@@ -23,6 +23,7 @@ const login = async (req, res) => {
 // Middleware to verify token
 const verifyToken = (req, res, next) => {
   const token = req.headers['x-access-token'];
+  console.log(token,"TOKEN")
   if (!token) {
     return res.status(403).send('No token provided');
   }

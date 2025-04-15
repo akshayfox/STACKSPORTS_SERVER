@@ -5,7 +5,8 @@ const connectDB = require('./config/db');
 const designRouter = require("./routes/designRouter");
 const formRouter = require("./routes/formRoutes");
 const uploadRoutes = require("./routes/uploadRouter");
-const authRoutes = require("./routes/authRoutes"); // Add this line
+const authRoutes = require("./routes/authRoutes");
+const clientRoutes = require("./routes/clientRoutes"); // Add this line
 
 const app = express();
 const PORT = process.env.PORT || 3005;
@@ -21,7 +22,8 @@ app.get('/', (req, res) => {
 app.use("/api/designs", designRouter);
 app.use("/api/form", formRouter);
 app.use("/api/image", uploadRoutes);
-app.use("/api/auth", authRoutes); // Add this line
+app.use("/api/auth", authRoutes);
+app.use("/api/clients", clientRoutes); // Add this line
 app.use('/uploads', express.static('uploads'));
 
 app.use((req, res, next) => {
