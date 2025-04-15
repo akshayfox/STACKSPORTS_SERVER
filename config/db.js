@@ -5,7 +5,11 @@ const User = require('../models/User');
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-    const existingUser = await User.findOne({ email: 'superadmin@gmail.com' });
+    console.log('MongoDB Connected');
+    
+    // Check if super admin exists using username instead of email
+    const existingUser = await User.findOne({ username: 'superadmin@gmail.com' });
+    
     if (!existingUser) {
       const hashedPassword = await bcrypt.hash('123456', 10);
       const superAdmin = new User({
