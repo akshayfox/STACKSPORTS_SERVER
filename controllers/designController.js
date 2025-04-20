@@ -32,13 +32,22 @@ const createDesign = async (req, res, next) => {
 
 const deleteDesign = async (req, res, next) => {
   try {
-    const { id } = req.params; // Get the ID from the request parameters
+    const { id } = req.params;
     const design = await Design.findById(id);
+    
     if (!design) {
       return res.status(404).json({ error: "Design not found" });
     }
-    const fs = require('fs');
-    if (design.thumbnail) {
+
+    // Check if thumbnail is used by other designs
+    const thumbnailUsageCount = await Design.countDocuments({
+      thumbnail: design.thumbnail,
+      _id: { $ne: id } // Exclude current design
+    });
+
+    // Only delete the thumbnail file if no other design is using it
+    if (thumbnailUsageCount === 0 && design.thumbnail) {
+      const fs = require('fs');
       fs.unlink(design.thumbnail, (err) => {
         if (err) {
           console.error("Error deleting file:", err);
@@ -47,6 +56,7 @@ const deleteDesign = async (req, res, next) => {
         }
       });
     }
+
     await Design.findByIdAndDelete(id);
     return res.status(200).json({ message: "Design deleted successfully" });
   } catch (error) {
