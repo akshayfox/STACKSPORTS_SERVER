@@ -9,6 +9,6 @@ router.get('/', getDesigns);
 router.put('/:id',upload.single('file'), editDesign);
 router.delete('/:id', deleteDesign);
 router.get('/:id', getDesigns);
-router.post('/:id/copy', verifyToken, copyDesign); 
+router.post('/:id/copy', copyDesign); 
 
 module.exports = router;
