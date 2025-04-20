@@ -105,6 +105,37 @@ const editDesign = async (req, res, next) => {
 
 
 
+const copyDesign = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { newName } = req.body;
+    if (!newName) {
+      return res.status(400).json({ error: "New design name is required" });
+    }
+    const originalDesign = await Design.findById(id);
+    if (!originalDesign) {
+      return res.status(404).json({ error: "Original design not found" });
+    }
+    const designCopy = new Design({
+      id: Date.now().toString(), // Generate a new unique ID
+      name: newName,
+      thumbnail: originalDesign.thumbnail,
+      elements: originalDesign.elements,
+      canvasSize: originalDesign.canvasSize
+    });
+    await designCopy.save();
+    return res.status(201).json({
+      message: "Design copied successfully",
+      design: designCopy
+    });
+  } catch (error) {
+    console.error("Error copying design:", error);
+    return res.status(500).json({ error: "Error copying design: " + error.message });
+  }
+};
+
+
+
 
 
 
@@ -131,4 +162,4 @@ const editDesign = async (req, res, next) => {
   };
   
   
-module.exports = { createDesign,getDesigns,deleteDesign,editDesign };
+module.exports = { createDesign, getDesigns, deleteDesign, editDesign, copyDesign };
