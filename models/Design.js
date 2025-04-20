@@ -17,9 +17,16 @@ const mongoose = require("mongoose");
 const elementSchema = new mongoose.Schema({
   id: { type: String, required: true },
   type: { type: String, enum: ["text", "image", "shape"], required: true },
-  content: { type: String},
+  content: { type: String },
   style: { type: mongoose.Schema.Types.Mixed, required: true },
-});
+  dynamic: { type: Boolean, default: false },
+  fieldName: { type: String },
+  metadata: {
+    isEditable: { type: Boolean, default: true },
+    isRequired: { type: Boolean, default: false },
+    defaultValue: { type: String }
+  }
+}, { timestamps: true });;
 
 const canvasSizeSchema = new mongoose.Schema({
   width: { type: Number, required: true },
