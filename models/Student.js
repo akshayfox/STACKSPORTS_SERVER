@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const elementSchema = new mongoose.Schema({
   id: { type: String, required: true },
@@ -31,7 +31,6 @@ const studentCardSchema = new mongoose.Schema(
     group: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User", // group user
-      required: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -42,4 +41,6 @@ const studentCardSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("StudentCard", studentCardSchema);
+
+module.exports = mongoose.model("StudentCard", studentCardSchema);
+

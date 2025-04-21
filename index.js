@@ -9,6 +9,8 @@ const authRoutes = require("./routes/authRoutes");
 const groupRoutes = require("./routes/groupRoutes"); 
 const clientRoutes = require("./routes/clientRoutes"); 
 const userRouter = require("./routes/userRouter"); 
+const studentRoutes = require("./routes/studentRoutes"); 
+
 
 
 
@@ -32,6 +34,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/clients", clientRoutes); 
 app.use("/api/groups", groupRoutes); // Add this line
 app.use('/uploads', express.static('uploads'));
+app.use("/api/student", studentRoutes);
+
 
 app.use((req, res, next) => {
   res.status(404).json({ message: 'Route not found' });
