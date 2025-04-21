@@ -86,9 +86,6 @@ const getStudentCardsByClientId = async (req, res) => {
       .populate('group', 'username')
       .populate('createdBy', 'username');
 
-    if (!cards.length) {
-      return res.status(404).json({ success: false, message: 'No student cards found for this client' });
-    }
     res.status(200).json({
       success: true,
       count: cards.length,
