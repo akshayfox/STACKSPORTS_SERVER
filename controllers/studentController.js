@@ -65,11 +65,15 @@ const getStudentCards = async (req, res, next) => {
 const getStudentCardsByClientId = async (req, res, next) => {
   try {
     const { clientId } = req.params;
+    const { groupId } = req.query;
     if (!clientId) {
       throw new AppError('Client ID is required', 400);
     }
-
-    const cards = await StudentCard.find({ client: clientId })
+    const filter = { client: clientId };
+    if (groupId) {
+      filter.group = groupId;
+    }
+    const cards = await StudentCard.find(filter)
       .populate('client', 'fullname')
       .populate('group', 'username')
       .populate('createdBy', 'username');
@@ -83,6 +87,7 @@ const getStudentCardsByClientId = async (req, res, next) => {
     next(error);
   }
 };
+
 
 // Get single student card
 const getStudentCardById = async (req, res, next) => {
