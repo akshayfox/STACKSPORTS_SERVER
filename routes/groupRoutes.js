@@ -9,7 +9,7 @@ const {
 const { verifyToken } = require('../controllers/authController');
 
 const router = express.Router();
-// router.use(verifyToken);
+router.use(verifyToken);
 router.post('/', createGroup);
 router.get('/', getGroups);
 router.get('/:id', getGroupById);

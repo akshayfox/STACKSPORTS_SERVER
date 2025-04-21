@@ -15,7 +15,6 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN } // 10s or whatever set in .env
     );
-console.log(token,'token')
     res.json({ token });
   } catch (error) {
     console.error('Error during login:', error);

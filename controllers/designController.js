@@ -1,7 +1,5 @@
 // controllers/designController.js
-const Design = require('../models/Design');
-
-
+const Design = require("../models/Design");
 
 const createDesign = async (req, res, next) => {
   try {
@@ -19,22 +17,17 @@ const createDesign = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error creating design:", error);
-    return res.status(500).json({ error: "Error creating design: " + error.message });
+    return res
+      .status(500)
+      .json({ error: "Error creating design: " + error.message });
   }
 };
-
-
-
-
-
-
-
 
 const deleteDesign = async (req, res, next) => {
   try {
     const { id } = req.params;
     const design = await Design.findById(id);
-    
+
     if (!design) {
       return res.status(404).json({ error: "Design not found" });
     }
@@ -42,12 +35,12 @@ const deleteDesign = async (req, res, next) => {
     // Check if thumbnail is used by other designs
     const thumbnailUsageCount = await Design.countDocuments({
       thumbnail: design.thumbnail,
-      _id: { $ne: id } // Exclude current design
+      _id: { $ne: id }, // Exclude current design
     });
 
     // Only delete the thumbnail file if no other design is using it
     if (thumbnailUsageCount === 0 && design.thumbnail) {
-      const fs = require('fs');
+      const fs = require("fs");
       fs.unlink(design.thumbnail, (err) => {
         if (err) {
           console.error("Error deleting file:", err);
@@ -61,22 +54,15 @@ const deleteDesign = async (req, res, next) => {
     return res.status(200).json({ message: "Design deleted successfully" });
   } catch (error) {
     console.error("Error deleting design:", error);
-    return res.status(500).json({ error: "Error deleting design: " + error.message });
+    return res
+      .status(500)
+      .json({ error: "Error deleting design: " + error.message });
   }
 };
 
-
-
-
-
-
-
-
-
-
 const editDesign = async (req, res, next) => {
   try {
-    const { id } = req.params; 
+    const { id } = req.params;
     const { name, templateData } = req.body;
     const existingDesign = await Design.findById(id);
 
@@ -109,11 +95,11 @@ const editDesign = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error updating design:", error);
-    return res.status(500).json({ error: "Error updating design: " + error.message });
+    return res
+      .status(500)
+      .json({ error: "Error updating design: " + error.message });
   }
 };
-
-
 
 const copyDesign = async (req, res, next) => {
   try {
@@ -131,45 +117,48 @@ const copyDesign = async (req, res, next) => {
       name: newName,
       thumbnail: originalDesign.thumbnail,
       elements: originalDesign.elements,
-      canvasSize: originalDesign.canvasSize
+      canvasSize: originalDesign.canvasSize,
     });
     await designCopy.save();
     return res.status(201).json({
       message: "Design copied successfully",
-      design: designCopy
+      design: designCopy,
     });
   } catch (error) {
     console.error("Error copying design:", error);
-    return res.status(500).json({ error: "Error copying design: " + error.message });
+    return res
+      .status(500)
+      .json({ error: "Error copying design: " + error.message });
   }
 };
 
+const getDesigns = async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
-
-
-
-
-
-  const getDesigns = async (req, res, next) => {
-    try {
-      const { id } = req.params;
-  
-      if (id) {
-        // Fetch a single design by ID
-        const design = await Design.findById(id);
-        if (!design) {
-          return res.status(404).json({ error: 'Design not found' });
-        }
-        return res.status(200).json({ design });
-      } else {
-        // Fetch all designs
-        const designs = await Design.find();
-        return res.status(200).json({ designs });
+    if (id) {
+      // Fetch a single design by ID
+      const design = await Design.findById(id);
+      if (!design) {
+        return res.status(404).json({ error: "Design not found" });
       }
-    } catch (error) {
-      return res.status(500).json({ error: 'Error fetching designs: ' + error.message });
+      return res.status(200).json({ design });
+    } else {
+      // Fetch all designs
+      const designs = await Design.find();
+      return res.status(200).json({ designs });
     }
-  };
-  
-  
-module.exports = { createDesign, getDesigns, deleteDesign, editDesign, copyDesign };
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Error fetching designs: " + error.message });
+  }
+};
+
+module.exports = {
+  createDesign,
+  getDesigns,
+  deleteDesign,
+  editDesign,
+  copyDesign,
+};
