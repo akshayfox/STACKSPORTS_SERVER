@@ -1,6 +1,7 @@
 const express = require('express');
 require('dotenv').config();
 const cors = require('cors');
+const { handleError } = require('./utils/errorHandler');
 const connectDB = require('./config/db');
 const designRouter = require("./routes/designRouter");
 const formRouter = require("./routes/formRoutes");
@@ -38,7 +39,15 @@ app.use("/api/student", studentRoutes);
 
 
 app.use((req, res, next) => {
-  res.status(404).json({ message: 'Route not found' });
+  res.status(404).json({ 
+    success: false,
+    message: 'Route not found' 
+  });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  handleError(err, res);
 });
 
 app.use((err, req, res, next) => {
