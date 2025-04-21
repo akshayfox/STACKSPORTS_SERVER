@@ -1,41 +1,46 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const { AppError } = require('../utils/errorHandler');
 
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
   try {
     const { username, password, role, ...userData } = req.body;
+    
     if (!username) {
-      return res.status(400).json({ message: "Username (email) is required" });
+      throw new AppError("Username (email) is required", 400);
     }
     if (!password) {
-      return res.status(400).json({ message: "Password is required" });
+      throw new AppError("Password is required", 400);
     }
     if (!['client', 'group'].includes(role)) {
-      return res.status(400).json({ message: "Invalid role specified" });
+      throw new AppError("Invalid role specified", 400);
     }
-    const user =await new User({
+
+    // Hash password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await new User({
       username,
-      password,
+      password: hashedPassword,
       role,
       ...userData,
       createdBy: req.userId,
     }).save();
-    console.log('working')
+
     const userResponse = user.toObject();
     delete userResponse.password;
+
     res.status(201).json({
       success: true,
       message: `${role.charAt(0).toUpperCase() + role.slice(1)} user created successfully`,
       data: userResponse,
     });
   } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-
-const getUsers = async (req, res) => {
+const getUsers = async (req, res, next) => {
   try {
     const { role } = req.query;
     const query = role ? { role } : {};
@@ -45,15 +50,14 @@ const getUsers = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data:users
+      data: users
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-const getUserById = async (req, res) => {
+const getUserById = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id)
       .select('-password')
@@ -61,24 +65,26 @@ const getUserById = async (req, res) => {
       .populate('createdBy', 'username');
     
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      throw new AppError('User not found', 404);
     }
+
     res.status(200).json({
       success: true,
       user
     });
   } catch (error) {
-    console.error('Error fetching user:', error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   try {
     const { password, ...updateData } = req.body;
+    
     if (password) {
       updateData.password = await bcrypt.hash(password, 10);
     }
+
     const user = await User.findByIdAndUpdate(
       req.params.id, 
       updateData, 
@@ -86,53 +92,53 @@ const updateUser = async (req, res) => {
     ).select('-password');
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      throw new AppError('User not found', 404);
     }
+
     res.status(200).json({
       success: true,
       message: 'User updated successfully',
       user
     });
   } catch (error) {
-    console.error('Error updating user:', error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
+    
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      throw new AppError('User not found', 404);
     }
+
     res.status(200).json({
       success: true,
       message: 'User deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting user:', error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-
-const getGroupByClientId = async (req, res) => {
+const getGroupByClientId = async (req, res, next) => {
   try {
     const { clientId } = req.params;
-    const users = await User.find({ client: clientId, role: 'group' })
-      .exec();
-    return res.status(200).json({
+    
+    if (!clientId) {
+      throw new AppError('Client ID is required', 400);
+    }
+
+    const users = await User.find({ client: clientId, role: 'group' }).exec();
+
+    res.status(200).json({
       success: true,
       count: users.length,
-      data:users,
+      data: users,
     });
   } catch (error) {
-    console.error('Error fetching users by clientId and role:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Error fetching users',
-      error: error.message,
-    });
+    next(error);
   }
 };
 
