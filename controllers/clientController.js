@@ -5,13 +5,9 @@ const { verifyToken } = require('./authController');
 const createClient = async (req, res) => {
   try {
     const clientData = req.body;
-    
-    // Add the user ID from the authenticated request
     clientData.user = req.userId;
-    
     const client = new Client(clientData);
     await client.save();
-    
     return res.status(201).json({
       success: true,
       message: "Client created successfully",
@@ -32,16 +28,12 @@ const getClients = async (req, res) => {
   try {
     const { userId } = req.query;
     let query = {};
-    
-    // If userId is provided, filter clients by that user
     if (userId) {
       query.user = userId;
     }
-    
     const clients = await Client.find(query)
       .populate('template', 'name thumbnail')
       .populate('user', 'username');
-      
     return res.status(200).json({
       success: true,
       count: clients.length,

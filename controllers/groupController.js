@@ -1,4 +1,5 @@
 const Group = require('../models/Group');
+const User = require('../models/User');
 
 // Create a new group
 const createGroup = async (req, res) => {
@@ -173,10 +174,34 @@ const deleteGroup = async (req, res) => {
   }
 };
 
+
+const getGroupByClientId = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const users = await User.find({ client: clientId, role: 'group' })
+    return res.status(200).json({
+      success: true,
+      count: users.length,
+      users,
+    });
+  } catch (error) {
+    console.error('Error fetching users by clientId and role:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error fetching users',
+      error: error.message,
+    });
+  }
+};
+
+
+
+
 module.exports = {
   createGroup,
   getGroups,
   getGroupById,
   updateGroup,
-  deleteGroup
+  deleteGroup,
+  getGroupByClientId
 };
