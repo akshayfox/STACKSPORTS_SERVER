@@ -4,13 +4,9 @@ const Group = require('../models/Group');
 const createGroup = async (req, res) => {
   try {
     const groupData = req.body;
-    
-    // Add the user ID from the authenticated request
     groupData.user = req.userId;
-    
     const group = new Group(groupData);
     await group.save();
-    
     return res.status(201).json({
       success: true,
       message: "Group created successfully",

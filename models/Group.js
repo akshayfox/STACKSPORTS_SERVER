@@ -4,7 +4,7 @@ const groupSchema = new mongoose.Schema(
   {
     client: {
       type: mongoose.Schema.Types.ObjectId,
-      // required: true,
+      required: true,
       ref: "Client",
     },
     name: {
@@ -15,6 +15,13 @@ const groupSchema = new mongoose.Schema(
     subGroupTitle: {
       type: String,
       trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      match: [/^\S+@\S+\.\S+$/, "Please use a valid email address"],
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

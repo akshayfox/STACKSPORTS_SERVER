@@ -45,7 +45,7 @@ const getClients = async (req, res) => {
     return res.status(200).json({
       success: true,
       count: clients.length,
-      clients
+      data:clients
     });
   } catch (error) {
     console.error("Error fetching clients:", error);
