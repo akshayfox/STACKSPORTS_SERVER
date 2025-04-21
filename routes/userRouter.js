@@ -4,10 +4,10 @@ const {
   getUsers, 
   getUserById, 
   updateUser, 
-  deleteUser 
+  deleteUser, 
+  getGroupByClientId
 } = require('../controllers/userController');
 const { verifyToken } = require('../controllers/authController');
-const { getGroupByClientId } = require('../controllers/groupController');
 
 const router = express.Router();
 router.use(verifyToken);

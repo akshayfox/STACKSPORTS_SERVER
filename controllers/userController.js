@@ -120,13 +120,11 @@ const getGroupByClientId = async (req, res) => {
   try {
     const { clientId } = req.params;
     const users = await User.find({ client: clientId, role: 'group' })
-      .populate('client', 'fullname place') 
-      .populate('group', 'name')
       .exec();
     return res.status(200).json({
       success: true,
       count: users.length,
-      users,
+      data:users,
     });
   } catch (error) {
     console.error('Error fetching users by clientId and role:', error);
