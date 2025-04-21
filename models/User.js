@@ -1,18 +1,11 @@
 const mongoose = require('mongoose');
 
-// Define the user schema
 const userSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true, // Unique username for the user
-      trim: true, // Trim whitespace
-      unique: true, // Ensure username is unique
-    },
-    email: {
-      type: String,
-      unique: true, 
-      match: [/^\S+@\S+\.\S+$/, 'Please use a valid email address'], // Email format validation
+      unique: true,
+      match: [/^\S+@\S+\.\S+$/, 'Please use a valid email address'],
     },
     password: {
       type: String,
@@ -21,12 +14,43 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['super_admin', 'client','group'], // User role, default is 'user'
+      enum: ['super_admin', 'client', 'group'],
       default: 'super_admin',
+    },
+    fullname: {
+      type: String,
+      trim: true,
+    },
+    place: {
+      type: String,
+      trim: true,
+    },
+    contact: {
+      type: String,
+      match: [/^\d{10}$/, 'Please use a valid 10-digit phone number.'],
+    },
+    grouptitle: {
+      type: String,
+      trim: true,
+    },
+    subGroupTitle: {
+      type: String,
+      trim: true,
+    },
+    template: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Template',
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }
 );
-const User = mongoose.model('User', userSchema);
 
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

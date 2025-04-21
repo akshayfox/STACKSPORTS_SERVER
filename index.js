@@ -8,6 +8,8 @@ const uploadRoutes = require("./routes/uploadRouter");
 const authRoutes = require("./routes/authRoutes");
 const groupRoutes = require("./routes/groupRoutes"); 
 const clientRoutes = require("./routes/clientRoutes"); 
+const userRouter = require("./routes/userRouter"); 
+
 
 
 const app = express();
@@ -22,6 +24,8 @@ app.get('/', (req, res) => {
 });
 
 app.use("/api/designs", designRouter);
+app.use("/api/user", userRouter);
+
 app.use("/api/form", formRouter);
 app.use("/api/image", uploadRoutes);
 app.use("/api/auth", authRoutes);
