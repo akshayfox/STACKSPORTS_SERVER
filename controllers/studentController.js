@@ -1,28 +1,22 @@
 const StudentCard = require('../models/Student');
+const { AppError } = require('../utils/errorHandler');
 
 // Create new student card
-const createStudentCard = async (req, res) => {
+const createStudentCard = async (req, res, next) => {
   try {
     if (!req.body.data) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing data field in request'
-      });
+      throw new AppError('Missing data field in request', 400);
     }
+    
     let studentCardData;
     try {
       studentCardData = JSON.parse(req.body.data);
     } catch (error) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid JSON data'
-      });
+      throw new AppError('Invalid JSON data', 400);
     }
+
     if (!studentCardData.client) {
-      return res.status(400).json({
-        success: false,
-        message: 'Missing required fields (client)'
-      });
+      throw new AppError('Missing required fields (client)', 400);
     }
     Object.assign(studentCardData, {
       name: studentCardData.name || 'Untitled Card',
@@ -32,23 +26,19 @@ const createStudentCard = async (req, res) => {
       ...(req.file && { thumbnail: req.file.path })
     });
     const studentCard = await new StudentCard(studentCardData).save();
+    
     return res.status(201).json({
       success: true,
       message: 'Student card created successfully',
       card: studentCard
     });
   } catch (error) {
-    console.error('Error creating student card:', error);
-    return res.status(500).json({ 
-      success: false, 
-      message: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    next(error);
   }
 };
 
-// Get all student cards with optional filters
-const getStudentCards = async (req, res) => {
+// Get all student cards
+const getStudentCards = async (req, res, next) => {
   try {
     const { client, group } = req.query;
     let query = {};
@@ -67,42 +57,40 @@ const getStudentCards = async (req, res) => {
       cards
     });
   } catch (error) {
-    console.error('Error fetching student cards:', error);
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 };
 
-
-
 // Get student cards by client ID
-const getStudentCardsByClientId = async (req, res) => {
+const getStudentCardsByClientId = async (req, res, next) => {
   try {
     const { clientId } = req.params;
+    const { groupId } = req.query;
     if (!clientId) {
-      return res.status(400).json({ success: false, message: 'Client ID is required' });
+      throw new AppError('Client ID is required', 400);
     }
-    const cards = await StudentCard.find({ client: clientId })
+    const filter = { client: clientId };
+    if (groupId) {
+      filter.group = groupId;
+    }
+    const cards = await StudentCard.find(filter)
       .populate('client', 'fullname')
       .populate('group', 'username')
       .populate('createdBy', 'username');
 
-    if (!cards.length) {
-      return res.status(404).json({ success: false, message: 'No student cards found for this client' });
-    }
     res.status(200).json({
       success: true,
       count: cards.length,
-      data:cards
+      data: cards
     });
   } catch (error) {
-    console.error('Error fetching cards by client ID:', error);
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 };
 
 
-// Get single student card by ID
-const getStudentCardById = async (req, res) => {
+// Get single student card
+const getStudentCardById = async (req, res, next) => {
   try {
     const card = await StudentCard.findOne({ id: req.params.id })
       .populate('client', 'fullname')
@@ -110,7 +98,7 @@ const getStudentCardById = async (req, res) => {
       .populate('createdBy', 'username');
 
     if (!card) {
-      return res.status(404).json({ success: false, message: 'Student card not found' });
+      throw new AppError('Student card not found', 404);
     }
 
     res.status(200).json({
@@ -118,23 +106,22 @@ const getStudentCardById = async (req, res) => {
       card
     });
   } catch (error) {
-    console.error('Error fetching student card:', error);
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 };
 
 // Update student card
-const updateStudentCard = async (req, res) => {
+const updateStudentCard = async (req, res, next) => {
   try {
     const updates = req.body;
     const card = await StudentCard.findOne({ id: req.params.id });
 
     if (!card) {
-      return res.status(404).json({ success: false, message: 'Student card not found' });
+      throw new AppError('Student card not found', 404);
     }
 
     Object.keys(updates).forEach(key => {
-      if (key !== 'id' && key !== 'createdBy') { // Prevent updating these fields
+      if (key !== 'id' && key !== 'createdBy') {
         card[key] = updates[key];
       }
     });
@@ -152,21 +139,19 @@ const updateStudentCard = async (req, res) => {
       card
     });
   } catch (error) {
-    console.error('Error updating student card:', error);
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 };
 
 // Delete student card
-const deleteStudentCard = async (req, res) => {
+const deleteStudentCard = async (req, res, next) => {
   try {
     const card = await StudentCard.findOne({ id: req.params.id });
 
     if (!card) {
-      return res.status(404).json({ success: false, message: 'Student card not found' });
+      throw new AppError('Student card not found', 404);
     }
 
-    // Delete thumbnail if exists
     if (card.thumbnail) {
       const fs = require('fs');
       const path = require('path');
@@ -183,8 +168,7 @@ const deleteStudentCard = async (req, res) => {
       message: 'Student card deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting student card:', error);
-    res.status(500).json({ success: false, message: error.message });
+    next(error);
   }
 };
 
